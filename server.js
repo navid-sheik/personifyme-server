@@ -1,19 +1,54 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import  "express-async-errors";
+import cors from "cors";
+import logger from "./logger/index.js";
+import routes from "./routes/index.js";
+import mongoose from "mongoose";
+import errorHandler from "./middleware/error-handler.js";
+import CustomError from "./errors/custom-error.js";
 
 
+//Initializing express app
 const app = express();
 
+
+//Middlewares
 app.use(cors());
 
-const PORT  = process.env.PORT || 4050;
+//Routers
+app.use("api", routes);
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Fcuk you' });
+
+
+
+
+//Testing Routes
+app.get("/", async(req, res) => {
+
+    // throw new CustomError("This is another error", 404);
+  res.json({ message: "Goood Morning Navid" });
 
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-});
+//Error Handler
+app.use(errorHandler)
+
+
+// Connection to database and starting server
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    logger.info("Connected to MongoDB");
+    app.listen(process.env.PORT, () => {
+      logger.info(`Server running on port ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    logger.error(err);
+    process.exit(1);
+  });
