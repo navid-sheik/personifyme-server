@@ -16,10 +16,10 @@ const app = express();
 
 //Middlewares
 app.use(cors());
+app.use(express.json());
 
 //Routers
-app.use("api", routes);
-
+app.use("/", routes);
 
 
 
@@ -34,6 +34,11 @@ app.get("/", async(req, res) => {
 
 //Error Handler
 app.use(errorHandler)
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).json({ message: err.message });
+});
 
 
 // Connection to database and starting server
