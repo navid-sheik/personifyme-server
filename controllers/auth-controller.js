@@ -52,7 +52,7 @@ export const signup = async (req, res, next) => {
         // await sendEmail({email : user.email, subject: "Email Verification", message : `This is your verification code ${verification_token}`});
 
         //Send the token to the user
-        res.status(202).json({  token, refreshToken: refreshToken.token });
+        res.status(202).json({  verified: user.verified , token, refreshToken: refreshToken.token });
 
 
     }catch(error){
@@ -102,7 +102,7 @@ export const login = async (req, res, next) => {
 
         await refreshToken.save();
 
-        res.json({ token, refreshToken: refreshToken.token });
+        res.json({ verified: user.verified , token, refreshToken: refreshToken.token });
     } catch (error) {
         console.log(error.message);
         next(error);
@@ -125,7 +125,7 @@ export const requestVerificationCode = async (req, res, next) => {
         const new_verification_token = await user.generateVerificationToken();
         // const verificationUrl = `http://localhost:3000/verify/${new_verification_token}`;
         await sendEmail({email : user.email, subject: "Email Verification", message : `This is your verification code ${new_verification_token}`});
-        res.status(200).json({ message: 'Verification code sent successfully' });
+        res.status(200).json({ success:  true, message: 'Verification code sent successfully' });
 
 
     }catch(error){
@@ -164,7 +164,7 @@ export const verifyAccount = async (req, res, next) => {
     
             await refreshToken.save();
     
-            res.json({ token, refreshToken: refreshToken.token, message: 'Account verified successfully' });
+            res.json({verified: user.verified ,  token, refreshToken: refreshToken.token });
         }
         else{
             res.status(400).json({ message: 'Invalid verification code, request new code' });
@@ -247,7 +247,7 @@ export const sendPasswordResetLink = async (req, res) =>{
         
         token = await new Token({userId : user._id, type : "reset-password",token : randomUUID()}).save()
         
-        const url =  `${process.env.BASE_MOBILE_URL}/password-reset/${user._id}/${token.token}`
+        const url =  `${process.env.BASE_MOBILE_URL}password-reset/${user._id}/${token.token}`
         await  sendEmail({email : user.email, subject : "Reset Password", message :  url })
         res.status(200).json({success: true, message : "Email sent successfully "})
 
