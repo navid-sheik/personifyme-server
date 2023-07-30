@@ -55,6 +55,12 @@ const UserSchema = new mongoose.Schema({
     reset_password_expires: {
         type: Date,
     },
+    seller_id : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Seller',
+    },
+    
+    
 }, { timestamps: true });
      
 UserSchema.pre("save",async function(next) {

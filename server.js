@@ -9,6 +9,11 @@ import mongoose from "mongoose";
 import errorHandler from "./middleware/error-handler.js";
 import CustomError from "./errors/custom-error.js";
 
+import Stripe from 'stripe';
+
+const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
+
+
 
 //Initializing express app
 const app = express();

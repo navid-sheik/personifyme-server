@@ -6,13 +6,13 @@ import { auth } from '../middleware/auth.js';
 const router  = express.Router();
 
 
-const temp = (req, res) => {};
+
 
  
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/logout', logout);
-router.post('/token', token);
+router.post('/logout', auth,  logout);
+router.post('/token',   token);
 router.post('/protected', auth , protectedRoute);
 router.post('/sendVerifyLink', requestVerificationCode);
 router.get('/checkVerifiedStatus', checkVerifedStatus);

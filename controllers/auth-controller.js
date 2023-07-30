@@ -8,6 +8,85 @@ import {v4 as uuidv4} from "uuid";
 import { randomUUID } from "crypto"
 import { sendEmail } from "../utils/sendEmail.js";
 import Token from "../models/token.js";
+import Stripe from 'stripe';
+
+
+const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
+
+
+
+
+
+
+export const checkAccount  =  async (req, res) => {
+    const {account_id} = req.body
+
+    const account = await stripe.accounts.retrieve(account_id);
+
+    res.status(200).send({success: true, message : "Account created successfully ", account })
+
+
+}
+
+
+export const updateOnBoarding  =  async (req, res) => {
+
+    const {account_id} = req.body
+    try {
+   
+
+        var accountLink  =  await stripe.accountLinks.create({
+            account: account_id,
+            refresh_url: 'https://example.com/reauth',
+            return_url: 'https://example.com/return',
+            collect: 'eventually_due',
+            type: 'account_onboarding',
+
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({success: false, message : "Something failed "})
+        return
+    }
+
+    res.status(200).send({success: true, message : "Account created successfully ", accountLink })
+}
+
+
+
+
+export const createCustomer = async (req, res, next) => {
+
+    const data =  req.body
+
+    try {
+        var account = await stripe.accounts.create({
+            type: 'custom',
+            country: 'US',
+            requested_capabilities: [ 'card_payments', 'transfers'],
+        });
+        console.log(account);
+
+        var accountLink  =  await stripe.accountLinks.create({
+            account: account.id,
+            refresh_url: 'https://example.com/reauth',
+            return_url: 'https://example.com/return',
+            collect: 'eventually_due',
+            type: 'account_onboarding',
+
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({success: false, message : "Something failed "})
+        return
+    }
+
+    res.status(200).send({success: true, message : "Account created successfully ",  url : accountLink.url})
+
+
+}
 
 
 
@@ -31,7 +110,7 @@ export const signup = async (req, res, next) => {
 
         //Generate a JWT token
         const payload = { userId : user._id };
-        const token  = await jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token  = await jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "10h" });
 
         // Create a refresh token
         const refreshToken = new RefreshToken({
@@ -85,7 +164,7 @@ export const login = async (req, res, next) => {
         // }
 
         const payload = { userId: user._id };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '10h' });
 
 
 
@@ -147,7 +226,7 @@ export const verifyAccount = async (req, res, next) => {
         const is_verified = user.validateVerificationToken(verification_token)
         if (is_verified){
             const payload = { userId: user._id };
-            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '10h' });
     
     
     
@@ -221,10 +300,11 @@ export const token = async (req, res, next) => {
             return res.status(401).json({ message: 'Token expired. Please sign in again.' });
         }
 
-        const payload = { userId: refreshTokenDoc.user };
-        const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30s' });
 
-        res.json({ token: newToken });
+        const payload = { userId: refreshTokenDoc.user };
+        const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '10h' });
+
+        res.json({  token : newToken, refreshToken: refreshToken.token });
     } catch (err) {
         logger.error(err.message);
         next(err);
@@ -310,19 +390,22 @@ export const resetPassword = async (req, res) =>{
 
 
 export const logout = async (req, res, next) => {
-    const refreshToken = req.body.refreshToken;
+    //Protected route 
+    const user_id = req.user;
     
-    if (!refreshToken) {
-        return res.status(400).json({ message: 'No refresh token provided.' });
+   
+    if (!user_id) {
+        return res.status(400).json({ message: 'Not loggedin ' });
     }
 
     try {
         // Invalidate the refresh token by removing it from the database
-        await RefreshToken.findOneAndDelete({ token: refreshToken });
+        await RefreshToken.findOneAndDelete({ user: user_id });
         
-        res.json({ message: 'Logged out successfully' });
+        return res.json({ success: true,  message: 'Logged out successfully' });
     } catch (error) {
-        next(error);
+        console.log(error.message);
+        return res.json({ success: false, message: 'Something went wrong' });
     }
 };
 
