@@ -1,10 +1,11 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
-import { createCustomer, checkAccount, updateOnBoarding, checkVerifedStatus } from '../controllers/auth-controller.js';
-import { checkVerificationStripe, createConnectAccount, refreshOnBoardingLink, requestOnBoardingLink, updateOnBoardingLink } from '../controllers/payment.js';
+
+import { checkVerificationStripe, createConnectAccount, refreshOnBoardingLink, requestOnBoardingLink, updateOnBoardingLink } from '../controllers/onboarding.js';
 
 const router  = express.Router();
 
+//OnBoarding Routes
 
 router.post('/account' ,  createConnectAccount);
 router.post('/link',  requestOnBoardingLink)

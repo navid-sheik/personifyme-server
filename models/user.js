@@ -11,7 +11,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide your full name'],
         trim: true,
-        min:  [true, 'Enter a valid name with at least 3 characters'],
+
+        minlength: [3, 'Enter a valid name with at least 3 characters'],
+       
     },
     email: {
         type: String,

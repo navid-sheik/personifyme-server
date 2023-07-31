@@ -10,6 +10,7 @@ import errorHandler from "./middleware/error-handler.js";
 import CustomError from "./errors/custom-error.js";
 
 import Stripe from 'stripe';
+import loggerHandler from "./middleware/logger-handler.js";
 
 const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
 
@@ -38,12 +39,14 @@ app.get("/", async(req, res) => {
 });
 
 //Error Handler
+
+// app.use(loggerHandler)
 app.use(errorHandler)
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
-});
+// // Error handling middleware
+// app.use((err, req, res, next) => {
+//   res.status(500).json({ message: err.message });
+// });
 
 
 // Connection to database and starting server

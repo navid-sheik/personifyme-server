@@ -15,7 +15,7 @@ router.post('/logout', auth,  logout);
 router.post('/token',   token);
 router.post('/protected', auth , protectedRoute);
 router.post('/sendVerifyLink', requestVerificationCode);
-router.get('/checkVerifiedStatus', checkVerifedStatus);
+router.get('/checkVerifiedStatus', auth, checkVerifedStatus);
 router.post('/verify', verifyAccount);
 router.post('/sendPasswordLink', sendPasswordResetLink);
 router.post('/resetPassword/:id/:token', resetPassword);
@@ -26,3 +26,4 @@ router.get('/verifyPasswordLink/:id/:token', verifyPasswordResetLink);
 
 
 export default router;
+

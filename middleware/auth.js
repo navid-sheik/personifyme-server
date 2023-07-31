@@ -1,27 +1,33 @@
 
 import jwt from "jsonwebtoken";
+import { errorResponse } from "../utils/response.js";
+
 export const auth = async (req, res, next) => {
 
-    const token  = req.header("Authorization").split(" ")[1];
+try {
+    const autherization = req.header("Authorization");
+    if (!autherization) {
+        let response = errorResponse("Missing Authorization", 401, "JWT Auth Error");
+        return res.status(401).json(response);
+    }
+
+    const token  = autherization.split(" ")[1];
     if (!token) {
-        return res.status(401).json({ message: "No token provided" });
+        let response =  errorResponse("Missing Bearer Token", 401, "JWT Auth Error");
+        return res.status(401).json(response);
     }
 
     console.log(token);
 
 
-    try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
-        // if (err) {
-        //     return res.status(401).json({ message: "Unauthorized" });
-        // }
-        req.user = payload.userId;
-       
-        next();
-    }
-    catch (error) {
-        console.log(error.message);
-        next(error);
-    }
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = payload.userId;
+    next();
+}
+catch (error) {
+    console.log(error.message);
+    next(error);
+}
 
 }
