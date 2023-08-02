@@ -5,6 +5,9 @@ import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';
 import { errorResponse } from "../utils/response.js";
 import AuthError from "../errors/auth-error.js";
+import CategoryError from "../errors/category-error.js";
+import ProductError from "../errors/product-error.js";
+import ReviewError from "../errors/review-error.js";
 
 
  
@@ -18,7 +21,22 @@ import AuthError from "../errors/auth-error.js";
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Auth Error"
-    }else if (err instanceof CustomError) {
+    } else if (err instanceof CategoryError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Category Error"
+    }
+    else if (err instanceof ProductError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Product Error"
+    }
+    else if (err instanceof ReviewError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Review Error"
+    }
+    else if (err instanceof CustomError) {
         statusCode = err.statusCode
         message = err.message;
         errorType = "Custom Error"
