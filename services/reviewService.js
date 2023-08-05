@@ -4,22 +4,28 @@ import ReviewError from "../errors/review-error.js";
 import AuthError from "../errors/auth-error.js";
 import Seller from "../models/seller-account.js";
 import { successResponse } from '../utils/response.js';
+import User from "../models/user.js";
 
 export default class ReviewService {
 
     static async createReview(user_id, reviewData) {
-        if (!user_id) {
+
+        let user  = await User.findById(user_id);
+        if (!user) {
             throw new AuthError('User not logged in ', 401 )
         }
 
-        const review = new Review({ ...reviewData, user: user_id });
+        const review = new Review({ ...reviewData, username : user.username });
         await review.save();
+
+        // Update the product review 
+
         
         return successResponse("Review created successfully", review);
     }
 
     static async getReviews() {
-        const reviews = await Review.find({}).populate('userId');
+        const reviews = await Review.find({});
         return successResponse("Reviews fetched successfully", reviews);
     }
 
@@ -34,8 +40,8 @@ export default class ReviewService {
         if (reviewData.productId) {
             delete reviewData.productId;
         }
-        if (reviewData.userId) {
-            delete reviewData.userId;
+        if (reviewData.username) {
+            delete reviewData.username;
         }
 
         const review = await Review.findByIdAndUpdate(id, reviewData, { new: true, runValidators: true });
@@ -67,7 +73,7 @@ export default class ReviewService {
     }
 
     static async getReviewById(id) {
-        const review = await Review.findById(id).populate('userId');
+        const review = await Review.findById(id);
         if (!review) {
             throw new ReviewError('Review not found', 404);
         }
@@ -76,7 +82,7 @@ export default class ReviewService {
     }
 
     static async getReviewsByProduct(productId) {
-        const reviews = await Review.find({ productId: productId }).populate('userId');
+        const reviews = await Review.find({ productId: productId })
         if (!reviews) {
             throw new ReviewError('No reviews found for this product', 404);
         }

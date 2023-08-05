@@ -16,7 +16,7 @@ const CategorySchema = new mongoose.Schema({
     },
     description: String
     // other fields you might want to include
-  });
+  } );
   
 const Category = mongoose.model('Category', CategorySchema);
 export default Category;

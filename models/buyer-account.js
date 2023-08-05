@@ -23,7 +23,7 @@ const BuyerSchema = new mongoose.Schema({
     
 
 
-})
+} ,  { timestamps: true , versionKey: false})
 
 const Buyer = mongoose.model('Buyer', BuyerSchema)
 

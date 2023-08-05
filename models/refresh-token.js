@@ -7,7 +7,7 @@ const refreshTokenSchema = new mongoose.Schema({
     },
     token: String,
     expires: Date
-});
+} ,  { timestamps: true , versionKey: false});
 
 const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema);
 

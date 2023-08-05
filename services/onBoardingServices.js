@@ -174,12 +174,12 @@ export const checkVerificationStripe = async (user_id) => {
     }
 
     if (isVerified) {
-        seller.is_verifed = true;
+        seller.is_verified = true;
         seller.hasCompletedOnboarding = true;
         await seller.save();
         return successResponse("Account verified successfully", response);
     }else {
-        seller.is_verifed = false;
+        seller.is_verified = false;
         seller.hasCompletedOnboarding = false;
         await seller.save();
         return successResponse( "Account not verified successfully", response);

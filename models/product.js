@@ -19,7 +19,7 @@ const OptionSchema = new mongoose.Schema({
       required: [true, 'Option Price is required'],
     },
     // Add other fields as necessary (like 'color', 'size', etc.)
-  });
+  } ,  { versionKey: false});
   
 const VariationSchema = new mongoose.Schema({
     name: {
@@ -27,7 +27,7 @@ const VariationSchema = new mongoose.Schema({
       required: [true, 'Name  Variatiion is required'],
     },
     options: [OptionSchema],
-  });
+  } ,  { versionKey: false});
 
 
   const DeliverySchema = new mongoose.Schema({
@@ -45,9 +45,9 @@ const VariationSchema = new mongoose.Schema({
         required: [true, 'Maximum delivery time is required']
       }
     }
-  });
+  } ,  { versionKey: false, _id: false});
   
-  const ShippingInfoSchema = new mongoose.Schema({
+const ShippingInfoSchema = new mongoose.Schema({
     processingTime: {
       min: {
         type: Number,
@@ -71,7 +71,7 @@ const VariationSchema = new mongoose.Schema({
       type: DeliverySchema,
       required: [true, 'Standard delivery is required']
     }
-  });
+  }, { versionKey: false, _id: false});
   
 const ProductSchema = new mongoose.Schema({
 
@@ -101,6 +101,14 @@ const ProductSchema = new mongoose.Schema({
         max: [Number.MAX_SAFE_INTEGER, 'Price must be less than 9223372036854775807']
 
 
+    },
+
+    quantity: {
+        type: Number,
+        required: true,
+        trim: true,
+        min: [0 , 'Quantity must be greater than 0'],
+        max: [Number.MAX_SAFE_INTEGER, 'Quantity must be less than 9223372036854775807']
     },
     category_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -148,13 +156,6 @@ const ProductSchema = new mongoose.Schema({
         enum: ['New', 'Used'],
         default: 'New'
     },
-    reviews: {
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Review'
-            }],
-        
-    },
     hasVariations: {
         type: Boolean,
         default: false
@@ -185,7 +186,7 @@ const ProductSchema = new mongoose.Schema({
 
 
 
-}, { timestamps: true });
+}, { timestamps: true, versionKey: false});
 
 
 function arrayLimit(val) {

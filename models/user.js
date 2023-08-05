@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
     },
     
     
-}, { timestamps: true });
+}, { timestamps: true , versionKey: false});
      
 UserSchema.pre("save",async function(next) {
 

@@ -31,13 +31,16 @@ export default class ProductService {
         logger.info(seller._id);
         const product = await new Product(productDataWithSeller);
         await product.save();
+        
+        let response_product  =   await Product.findById(product._id).populate('seller_id category_id');
+       
 
-        return successResponse("Product created successfully", product);
+        return successResponse("Product created successfully", response_product );
     }
 
     static async getProducts() {
         const products = await Product.find({isDeleted : false})
-            .populate('reviews seller_id category_id');
+            .populate('seller_id category_id');
 
         return successResponse("Products fetched successfully", products);
     }
@@ -76,9 +79,7 @@ export default class ProductService {
         if (productData.isDeleted) {
             delete productData.isDeleted;
         }
-        if (productData.reviews) {
-            delete productData.reviews;
-        }
+       
 
         
 
@@ -88,7 +89,7 @@ export default class ProductService {
 
         // const product = await Product.findByIdAndUpdate(id, productData, { new: true, runValidators: true });
         const updatedProduct = await Product.findById(product._id)
-            .populate('reviews seller_id category_id');
+            .populate('seller_id category_id');
 
         return successResponse("Product updated successfully", updatedProduct);
     }
@@ -129,7 +130,7 @@ export default class ProductService {
 
     static async getProductById(id) {
         const product = await Product.findById(id)
-            .populate('reviews seller_id category_id');
+            .populate('seller_id category_id');
         if (!product) {
             throw new ProductError('Product not found', 404 )
         }

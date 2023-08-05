@@ -15,7 +15,7 @@ const TokeSchema = new mongoose.Schema({
     token : { type : String,  required: true},
     createdAt : { type : Date, required: true, default: Date.now, expires: 3600 }
 
-})
+} ,  { timestamps: true , versionKey: false})
 
 const Token = mongoose.model('Token', TokeSchema)
 

@@ -45,7 +45,7 @@ const SellerSchema = new mongoose.Schema({
     origin_country : { type : String, required: true},
 
 
-})
+}, { timestamps: true , versionKey: false});
 
 const Seller = mongoose.model('Seller', SellerSchema)
 
