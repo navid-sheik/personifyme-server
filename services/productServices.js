@@ -5,6 +5,7 @@ import Category from "../models/category.js";
 import AuthError from "../errors/auth-error.js";
 import { successResponse } from '../utils/response.js';
 import logger from "../logger/index.js";
+import { uploadMoreImages } from '../utils/cloudinary.js';
 
 export default class ProductService {
 
@@ -32,6 +33,26 @@ export default class ProductService {
         const product = await new Product(productDataWithSeller);
         await product.save();
         
+
+        const product_id = product._id;
+        if (productData.images && productData.images.length > 0) {
+            try {
+                const imageUrls = await uploadMoreImages(productData.images, seller._id.toString(), product_id.toString());
+                product.images = imageUrls; // Replace base64 or local paths with Cloudinary URLs
+                console.log("Image uploaded")
+                await product.save(); // Update the product with Cloudinary image URLs.
+            } catch (error) {
+
+                console.log("Somehing wrong")
+                console.log("Error uploading images", error);
+                // Optionally delete the product if image upload fails. Depends on your use case.
+                // await product.remove();
+                // throw new ProductError('Error uploading images', 500 )
+            }
+        }
+    
+
+
         let response_product  =   await Product.findById(product._id).populate('seller_id category_id');
        
 

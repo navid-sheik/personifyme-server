@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import logger from "../middleware/logger-handler.js";
 
 
-const OptionSchema = new mongoose.Schema({
+export const OptionSchema = new mongoose.Schema({
     name: {
       type: String,
       required: [true, 'Option Name is required'],
@@ -21,12 +21,12 @@ const OptionSchema = new mongoose.Schema({
     // Add other fields as necessary (like 'color', 'size', etc.)
   } ,  { versionKey: false});
   
-const VariationSchema = new mongoose.Schema({
+export const VariationSchema = new mongoose.Schema({
     name: {
       type: String,
       required: [true, 'Name  Variatiion is required'],
     },
-    options: [OptionSchema],
+    options: [String],
   } ,  { versionKey: false});
 
 
@@ -139,7 +139,7 @@ const ProductSchema = new mongoose.Schema({
     },
     images: {
         type: [String],
-        required: [true, 'Product images are required'],
+        default: []
        
     },
     status: {

@@ -1,6 +1,7 @@
 // services/userService.js
 import bcrypt from "bcryptjs";
 import User from "../models/user.js";
+import Buyer from "../models/buyer-account.js";
 import jwt from 'jsonwebtoken';
 import RefreshToken from "../models/refresh-token.js";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +10,7 @@ import AuthError from "../errors/auth-error.js";
 import { successResponse } from "../utils/response.js";
 import Token from "../models/token.js";
 import { sendEmail } from "../utils/sendEmail.js";
+
 
 import { randomUUID } from "crypto"
 
@@ -27,6 +29,9 @@ export const signup = async (name , email, password, username) => {
     user =  await User.create({ name, email, password, username });
     await user.save();
 
+
+
+  
     //Generate token 
     const { token, refreshToken } = await generateToken(user);
     return  successResponse("Successfully signed up", { email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });

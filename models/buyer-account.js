@@ -12,11 +12,16 @@ import mongoose, { Schema } from "mongoose";
 // payment : [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
 
 const BuyerSchema = new mongoose.Schema({
-    random : {
-        type: String,
-        required: true,
-        default : "random"
-    }
+    userId : {
+        type: Schema.Types.ObjectId, 
+        ref: 'User' ,
+        required: true
+        
+        },
+    likes : [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    reviews : [{ type: Schema.Types.ObjectId, ref: 'Review' }],
+    
+
     // orders : [{ type: Schema.Types.ObjectId, ref: 'Order' }],
 
 

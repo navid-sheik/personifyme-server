@@ -18,6 +18,8 @@ const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOW
 
 //Initializing express app
 const app = express();
+app.use(express.urlencoded({extended: true, limit: '50mb'}));
+app.use(express.json({limit: '50mb'})) // To parse the incoming requests with JSON payloads
 
 
 //Middlewares
@@ -38,6 +40,58 @@ app.get("/", async(req, res) => {
 
 });
 
+// app.post('/payment-sheet', async (req, res) => {
+//   // Use an existing Customer ID if this is a returning customer.
+//   const customer = await stripe.customers.create();
+//   const ephemeralKey = await stripe.ephemeralKeys.create(
+//     {customer: customer.id},
+//     {apiVersion: '2022-11-15'}
+//   );
+//   const paymentIntent = await stripe.paymentIntents.create({
+//     amount: 1099,
+//     currency: 'eur',
+//     customer: customer.id,
+//     automatic_payment_methods: {
+//       enabled: true,
+//     },
+//   });
+
+//   res.json({
+//     paymentIntent: paymentIntent.client_secret,
+//     ephemeralKey: ephemeralKey.secret,
+//     customer: customer.id,
+//     publishableKey: 'pk_test_51NYyrYB6nvvF5Xeh38vBBJ9xWCtNKsSLuFexpx3A9nTpOAj9TZTLTRdRuo5cJbJusInPeXJo0LH1zoW3NHSDLtGZ00LrL4fvI5'
+//   });
+// });
+
+
+const calculateOrderAmount = (items) => {
+  // Replace this constant with a calculation of the order's amount
+  // Calculate the order total on the server to prevent
+  // people from directly manipulating the amount on the client
+  return 1400;
+};
+
+
+app.post("/create-payment-intent", async (req, res) => {
+  const { items } = req.body;
+
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: calculateOrderAmount(items),
+    currency: "gbp",
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
+
+
+
 //Error Handler
 
 // app.use(loggerHandler)
@@ -47,6 +101,7 @@ app.use(errorHandler)
 // app.use((err, req, res, next) => {
 //   res.status(500).json({ message: err.message });
 // });
+
 
 
 // Connection to database and starting server

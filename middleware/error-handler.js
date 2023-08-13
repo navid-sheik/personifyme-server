@@ -8,6 +8,7 @@ import AuthError from "../errors/auth-error.js";
 import CategoryError from "../errors/category-error.js";
 import ProductError from "../errors/product-error.js";
 import ReviewError from "../errors/review-error.js";
+import CartError from "../errors/cart-error.js";
 
 
  
@@ -25,6 +26,11 @@ import ReviewError from "../errors/review-error.js";
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Category Error"
+    }
+    else if (err instanceof CartError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Cart Error"
     }
     else if (err instanceof ProductError) {
         statusCode = err.statusCode;
