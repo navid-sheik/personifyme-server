@@ -9,6 +9,8 @@ import CategoryError from "../errors/category-error.js";
 import ProductError from "../errors/product-error.js";
 import ReviewError from "../errors/review-error.js";
 import CartError from "../errors/cart-error.js";
+import PayoutError from "../errors/payout-error.js";
+import OrderError from "../errors/order-error.js";
 
 
  
@@ -26,6 +28,15 @@ import CartError from "../errors/cart-error.js";
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Category Error"
+    }else if (err instanceof PayoutError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Payout Error"
+    }
+    else if (err instanceof OrderError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Order Error"
     }
     else if (err instanceof CartError) {
         statusCode = err.statusCode;

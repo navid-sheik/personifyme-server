@@ -1,99 +1,106 @@
 // token schema mongoose schema
 import mongoose, { Schema } from "mongoose";
+import OrderItem from "./orderItem.js";
 
 
 
-const orderItemSchema = new mongoose.Schema({
-    product: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Product',
-        required: true
-    },
-    quantity: {
-        type: Number,
-        required: true
-    },
-    price: { 
-        type: Number,
-        required: true
-    },
-    total: {
-        type: Number,
-        required: true
-    }
-});
 
-const shippingSchema = new mongoose.Schema({
-    addressLine1: {
+
+
+
+const AddressSchema = new mongoose.Schema({
+    line1: {
         type: String,
         required: true
     },
-    addressLine2: String,
-    city: {
+    line2: {
         type: String,
-        required: true
-    },
-    state: {
-        type: String,
-        required: true
-    },
-    postalCode: {
-        type: String,
-        required: true
     },
     country: {
         type: String,
         required: true
     },
+    postalCode: {
+        type: String,
+    },
+    city: {
+        type: String,
+    },
+    state: {
+        type: String,
+    },
+    name: {
+        type: String,
+    },
     phone: String,
-    trackingNumber: String,
-    carrier: String
-});
+ 
+}, { versionKey: false, _id : false});
 
-const paymentSchema = new mongoose.Schema({
+const PaymentSchema = new mongoose.Schema({
     method: {
         type: String,
         enum: ['CreditCard', 'PayPal', 'Crypto', 'BankTransfer'],
-        required: true
+        default : 'CreditCard',
     },
-    status: {
+    paymentStatus: {
         type: String,
         enum: ['Pending', 'Completed', 'Failed'],
+        default : 'Pending',
         required: true
     },
-    transactionId: String
-});
+    failedReason: String,
+    transactionId: {
+        type: String,
+    }
+} , { versionKey: false, _id : false});
+
+
+
 
 const orderSchema = new mongoose.Schema({
-    user: { 
+    userId: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User',
         required: true
     },
-    orderItems: [orderItemSchema],
-    shippingDetails: shippingSchema,
-    paymentDetails: paymentSchema,
+    orderItems: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'OrderItem',
+
+    },
+    shippingDetails: AddressSchema,
+    // paymentDetails: PaymentSchema,
+    transactionId : String,
     orderStatus: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
-        required: true
+        enum: ['Pending', 'Paid' , 'Processing', 'Processing',  'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Refunded'],
+        default : 'Paid',
     },
     orderTotal: {
         type: Number,
         required: true
     },
-    taxAmount: Number,
-    shippingCost: Number,
-    discount: Number,
-    placedAt: {
-        type: Date,
-        default: Date.now
+    taxAmount : {
+        type: Number,
+        default: 0
     },
-    shippedAt: Date,
-    deliveredAt: Date,
-    notes: String
-});
+    shippingCost: {
+        type: Number,
+        default: 0
+    },
+    
+
+} , { timestamps: true, versionKey: false});
 
 const Order = mongoose.model('Order', orderSchema);
 
-module.exports = Order;
+export default Order;
+
+// const SellerItemSchema = new mongoose.Schema({
+//     sellerId: {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: 'Seller',
+//         required: true
+//     },
+//     orderItems: [OrderItemSchema],
+// } , { versionKey: false, _id : false});

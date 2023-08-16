@@ -36,12 +36,15 @@ export default class CartService {
 
         await cart.save();
 
-        return successResponse("Item added to cart successfully", cart);
+        let cart_to_return = await Cart.findOne({ userId: user_id }).populate({path: 'items.productId', select: 'title images' });
+
+        return successResponse("Item added to cart successfully", cart_to_return);
     }
 
     static async get(itemId) {
         // 1. Fetch a cart that contains the item with the given itemId
-        const cart = await Cart.findOne({ "items._id": itemId }).populate('items.productId');
+        const cart = await Cart.findOne({ "items._id": itemId }).populate({path: 'items.productId', select: 'title images' });
+        // const cart = await Cart.findOne({ "items._id": itemId });
         if (!cart) {
             throw new CartError('Cart not found', 404);
         }
@@ -63,7 +66,8 @@ export default class CartService {
             throw new AuthError('User not logged in', 401);
         }
 
-        const cart = await Cart.findOne({ userId: user_id }).populate('items.productId');
+        const cart = await Cart.findOne({ userId: user_id }).populate({path: 'items.productId', select: 'title images' });
+        // const cart = await Cart.findOne({ userId: user_id })
         if (!cart) {
             throw new CartError('Cart not found', 404);
         }
@@ -88,7 +92,8 @@ export default class CartService {
         }
         await cart.save();
 
-        return successResponse("Cart item updated successfully", cart);
+        let cart_to_return = await Cart.findOne({ userId: user_id }).populate({path: 'items.productId', select: 'title images' });
+        return successResponse("Cart item updated successfully", cart_to_return);
     }
 
     static async removeFromCart(user_id, itemId) {
@@ -101,8 +106,8 @@ export default class CartService {
         if (!cart) {
             throw new CartError('Cart not found', 404);
         }
-
-        return successResponse("Item removed from cart successfully", cart);
+        let cart_to_return = await Cart.findOne({ userId: user_id }).populate({path: 'items.productId', select: 'title images' });
+        return successResponse("Item removed from cart successfully", cart_to_return);
     }
 
     static async emptyCart(user_id) {

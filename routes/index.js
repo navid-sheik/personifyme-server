@@ -6,6 +6,7 @@ import sellerRouter from './seller.js'
 import productRouter from './product.js'
 import reviewRouter from './review.js'
 import categoryRouter from './category.js'
+import orderRouter from './order.js'
 import cartRouter from './cart.js'
 import webHookRouter from './stripe-webhook.js'
 import { auth } from '../middleware/auth.js';
@@ -22,6 +23,7 @@ router.use('/products',  productRouter);
 router.use('/categories',  categoryRouter);
 router.use('/seller', auth,  sellerRouter);
 router.use('/reviews',reviewRouter )
+router.use('/orders',orderRouter )
 
 
 
