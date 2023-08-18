@@ -6,11 +6,13 @@ const SearchQuerySchema = new mongoose.Schema({
         required: true
     },
 
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    count: {
+        type: Number,
+        default: 1
     }
 
 }, { timestamps: true, versionKey: false});
 
-module.exports = mongoose.model('SearchQuery', SearchQuerySchema);
+const Search = mongoose.model('Search', SearchQuerySchema)
+
+export default Search
