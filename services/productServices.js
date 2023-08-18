@@ -53,15 +53,32 @@ export default class ProductService {
     
 
 
-        let response_product  =   await Product.findById(product._id).populate('seller_id category_id');
+        let response_product  =   await Product.findById(product._id).populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop'
+            }
+        })
+        .populate('category_id');
+
        
 
         return successResponse("Product created successfully", response_product );
     }
 
     static async getProducts() {
-        const products = await Product.find({isDeleted : false})
-            .populate('seller_id category_id');
+        const products = await Product.find({ isDeleted: false })
+        .populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop'
+            }
+        })
+        .populate('category_id');
 
         return successResponse("Products fetched successfully", products);
     }
@@ -110,7 +127,16 @@ export default class ProductService {
 
         // const product = await Product.findByIdAndUpdate(id, productData, { new: true, runValidators: true });
         const updatedProduct = await Product.findById(product._id)
-            .populate('seller_id category_id');
+        .populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop'
+            }
+        })
+        .populate('category_id');
+
 
         return successResponse("Product updated successfully", updatedProduct);
     }
@@ -151,7 +177,16 @@ export default class ProductService {
 
     static async getProductById(id) {
         const product = await Product.findById(id)
-            .populate('seller_id category_id');
+        .populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop'
+            }
+        })
+        .populate('category_id');
+
         if (!product) {
             throw new ProductError('Product not found', 404 )
         }

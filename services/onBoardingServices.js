@@ -6,6 +6,7 @@ import User from "../models/user.js";
 import Stripe from 'stripe';
 import { v4 as uuidv4 } from "uuid";
 import logger from "../logger/index.js";
+import Shop from "../models/shop.js";
 const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
 
 
@@ -46,6 +47,28 @@ export const createConnectedAccount   =  async (country, user_id) => {
     await seller.save();
     user.seller_id = seller._id;
     await user.save();
+
+
+    
+    let category = await  Category.find({});
+    //take the first category
+    
+
+    if (!category){
+        throw new CategoryError('Category not found', 404);
+    }
+
+    const shop = new Shop({
+        ...shopData,
+        categoryId : category[0]._id,
+        categoryName : category[0].name,
+        emailSupport : user.email,
+    });
+
+    await shop.save();
+
+    seller.shopId = newShop._id;
+    await seller.save();
 
     
     return successResponse("Account created successfully", {id : seller._id, hasStartedOnboarding : seller.hasStartedOnboarding, hasCompletedOnboarding : seller.hasCompletedOnboarding});

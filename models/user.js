@@ -61,6 +61,19 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Seller',
     },
+
+    likes : {
+        type : [mongoose.Schema.Types.ObjectId],
+        ref : 'Product',
+        default : [],
+
+    }, 
+
+    shopFollowed : {
+        type : [mongoose.Schema.Types.ObjectId],
+        ref : 'Shop',
+        default : [],
+    }
     
     
 }, { timestamps: true , versionKey: false});

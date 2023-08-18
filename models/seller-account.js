@@ -43,6 +43,10 @@ const SellerSchema = new mongoose.Schema({
       },
 
     origin_country : { type : String, required: true},
+    shopId :{
+        type: Schema.Types.ObjectId,
+        ref: 'Shop',
+    }
 
 
 }, { timestamps: true , versionKey: false});

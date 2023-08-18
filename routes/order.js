@@ -11,6 +11,7 @@ import {
 
 } from '../controllers/order-controller.js';
 import { auth } from '../middleware/auth.js';
+import { checkShopPriviligies } from '../controllers/shop-controller.js';
 
 const router = express.Router();
 
@@ -34,6 +35,8 @@ router.post('/success', auth, successOrder);
 
 router.get('/items', auth, getOrderItemsForUser);
 router.get('/seller', auth, getOrderItemsForSeller);
+
+
 
 
 export default router;

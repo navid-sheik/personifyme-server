@@ -11,6 +11,7 @@ import ReviewError from "../errors/review-error.js";
 import CartError from "../errors/cart-error.js";
 import PayoutError from "../errors/payout-error.js";
 import OrderError from "../errors/order-error.js";
+import SellerError from "../errors/seller-error.js";
 
 
  
@@ -32,6 +33,11 @@ import OrderError from "../errors/order-error.js";
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Payout Error"
+    }
+    else if (err instanceof SellerError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Seller Error"
     }
     else if (err instanceof OrderError) {
         statusCode = err.statusCode;

@@ -13,6 +13,11 @@ import { sendEmail } from "../utils/sendEmail.js";
 
 
 import { randomUUID } from "crypto"
+import Product from "../models/product.js";
+import ProductError from "../errors/product-error.js";
+import Shop from "../models/shop.js";
+import mongoose from "mongoose";
+
 
 
 
@@ -34,7 +39,7 @@ export const signup = async (name , email, password, username) => {
   
     //Generate token 
     const { token, refreshToken } = await generateToken(user);
-    return  successResponse("Successfully signed up", { email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
+    return  successResponse("Successfully signed up", { seller_id: user.seller_id,  user_id: user._id,  email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
 
 };
 
@@ -55,7 +60,7 @@ export const login = async (email, password) => {
 
     //Generate token
     const { token, refreshToken } = await generateToken(user);
-    return  successResponse("Successfully logged in up", { email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
+    return  successResponse("Successfully logged in up", { seller_id: user.seller_id, user_id: user._id,  email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
 };
 
 
@@ -91,7 +96,7 @@ export const verifyEmail = async (verification_token, email) => {
        
     }
     const {token , refreshToken} = await generateToken(user);
-    return  successResponse("Successfully logged in up", { email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
+    return  successResponse("Successfully logged in up", { seller_id: user.seller_id, user_id: user._id, email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
 
 
 
@@ -110,7 +115,7 @@ export const checkVerifedStatus  =  async (used_id) => {
         // const verificationUrl = `${process.env.MOBILE_URL}/verify/${verification_token}`;
         await sendEmail({email : user.email, subject: "Email Verification", message : `This is your verification code ${verification_token}`});
         
-        return  successResponse("Please verify your email", { email : user.email, verified : user.verified });
+        return  successResponse("Please verify your email", { seller_id: user.seller_id, user_id: user._id, email : user.email, verified : user.verified });
 res
     }
 }
@@ -222,4 +227,143 @@ export const getUserById = async (user_id) => {
         throw new AuthError('User not found', 404);
     }
     return user;
+}
+
+
+
+export const likeProduct = async (user_id, product_id) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const user = await User.findById(user_id);
+        if (!user) {
+            throw new AuthError('User not found');
+        }
+
+        const product = await Product.findById(product_id).populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop',
+            },
+        });
+
+        if (!product) {
+            throw new ProductError('Product not found', 404);
+        }
+
+        if (user.likes.includes(product_id)) {
+            throw new ProductError('Product already liked', 409); // 409 Conflict
+        }
+
+        user.likes.push(product_id);
+        await user.save({ session });
+
+        // Calling separate function to handle shop like increment
+        await incrementShopLikes(product.seller_id.shopId);
+
+        await session.commitTransaction();
+
+        return successResponse('Successfully liked product', product_id);
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Transaction aborted due to: ', error);
+        throw error; // This error should be caught by an outer error handler (e.g., middleware in Express) to send an appropriate response to the client.
+    } finally {
+        session.endSession();
+    }
+};
+
+const incrementShopLikes = async (shopId) => {
+    try {
+        // Atomic increment of likes by 1
+        await Shop.findByIdAndUpdate(shopId, { $inc: { totalLikes : 1 } });
+    } catch (error) {
+        console.error('Failed to increment shop likes: ', error);
+        throw new Error('Failed to update shop likes');
+    }
+};
+
+
+
+
+
+export const unlikeProduct = async (user_id, product_id) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const user = await User.findById(user_id);
+        if (!user) {
+            throw new AuthError('User not found', 404);
+        }
+
+        const product = await Product.findById(product_id).populate({
+            path: 'seller_id',
+            model: 'Seller',
+            populate: {
+                path: 'shopId',
+                model: 'Shop',
+            },
+        });
+
+        if (!product) {
+            throw new ProductError('Product not found', 404);
+        }
+
+        if (!user.likes.includes(product_id)) {
+            throw new ProductError('Product not liked by user', 409); // 409 Conflict
+        }
+
+        user.likes = user.likes.filter((id) => id.toString() !== product_id.toString());
+        await user.save({ session });
+
+        // Calling separate function to handle shop like decrement
+        await decrementShopLikes(product.seller_id.shopId);
+
+        await session.commitTransaction();
+
+        return successResponse('Successfully unliked product', product_id);
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error('Transaction aborted due to: ', error);
+        throw error; // This error should be caught by an outer error handler (e.g., middleware in Express) to send an appropriate response to the client.
+    } finally {
+        session.endSession();
+    }
+};
+
+const decrementShopLikes = async (shopId) => {
+    try {
+        // Atomic decrement of likes by 1
+        await Shop.findByIdAndUpdate(shopId, { $inc: { totalLikes: -1 } });
+    } catch (error) {
+        console.error('Failed to decrement shop likes: ', error);
+        throw new Error('Failed to update shop likes');
+    }
+};
+
+
+export const getLikedProducts = async (user_id) => {
+    if (!user_id){
+        throw new AuthError('User not found', 404);
+    }
+
+    let user = await User.findById(user_id).populate('likes');
+    if (!user){
+        throw new AuthError('User not found', 404);
+    }
+
+    // Return only likes products arrays
+    if (!user.likes){
+        return successResponse("Successfully fetched liked products", []);
+    }
+
+    let likes = user.likes.map((product) => product._id);
+
+    return successResponse("Successfully fetched liked products", user.likes);
 }

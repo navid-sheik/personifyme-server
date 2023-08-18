@@ -8,6 +8,8 @@ import reviewRouter from './review.js'
 import categoryRouter from './category.js'
 import orderRouter from './order.js'
 import cartRouter from './cart.js'
+import buyerRouter from './buyer.js'
+import shopRouter from './shop.js'
 import webHookRouter from './stripe-webhook.js'
 import { auth } from '../middleware/auth.js';
 
@@ -24,6 +26,8 @@ router.use('/categories',  categoryRouter);
 router.use('/seller', auth,  sellerRouter);
 router.use('/reviews',reviewRouter )
 router.use('/orders',orderRouter )
+router.use('/shop',shopRouter )
+router.use('/user',auth, buyerRouter )
 
 
 
