@@ -17,6 +17,8 @@ import Product from "../models/product.js";
 import ProductError from "../errors/product-error.js";
 import Shop from "../models/shop.js";
 import mongoose from "mongoose";
+import logger from "../logger/index.js";
+import { uploadImage } from "../utils/cloudinary.js";
 
 
 
@@ -35,7 +37,8 @@ export const signup = async (name , email, password, username) => {
     await user.save();
 
 
-
+    //Create  a new empty cart
+    //Create new stripe customer object 
   
     //Generate token 
     const { token, refreshToken } = await generateToken(user);
@@ -226,8 +229,38 @@ export const getUserById = async (user_id) => {
     if (!user) {
         throw new AuthError('User not found', 404);
     }
-    return user;
+    return successResponse("Successfully retrieved user",  user );
 }
+export const updateUserById = async (user_id, updateData) => {
+        const imageString = updateData.image;
+
+        
+        if (imageString && isBase64(imageString)) {
+            // If shop.image is not empty and not a URL, then upload it
+            try {
+                const newImageUrl = await uploadImage(imageString, 'user_images', user_id.toString());
+                // After the image is uploaded, set the shop.image field with the new URL
+                console.log('Uploaded image for users:', newImageUrl);
+                updateData.image = newImageUrl;
+            } catch (error) {
+                logger.error(error);
+                console.error('Error uploading image:', error.message);
+                throw new AuthError('Failed to upload image', 500);
+            }
+        }
+
+        const user = await User.findByIdAndUpdate(user_id, updateData, { new: true });
+        
+        // Check if the user exists
+        if (!user) {
+            throw new AuthError('User not found', 404);
+        }
+
+        // Return success response
+        return successResponse("Successfully updated user", user);
+     
+}
+
 
 
 
@@ -367,3 +400,20 @@ export const getLikedProducts = async (user_id) => {
 
     return successResponse("Successfully fetched liked products", user.likes);
 }
+
+function isURL(str) {
+    try {
+        new URL(str);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+function isBase64(str) {
+    try {
+      // Check if the string has the base64 format: data:image/[type];base64,[data]
+      return Boolean(str.match(/^data:image\/([a-zA-Z]+);base64,/));
+    } catch (err) {
+      return false;
+    }
+  }

@@ -12,7 +12,7 @@ import CartError from "../errors/cart-error.js";
 import PayoutError from "../errors/payout-error.js";
 import OrderError from "../errors/order-error.js";
 import SellerError from "../errors/seller-error.js";
-
+import PaymentError from "../errors/payment-error.js";
 
  
  //Middleware for handling errors
@@ -29,7 +29,13 @@ import SellerError from "../errors/seller-error.js";
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Category Error"
-    }else if (err instanceof PayoutError) {
+    }else if (err instanceof PaymentError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errorType = "Payment Stripe Error"
+    }
+    
+    else if (err instanceof PayoutError) {
         statusCode = err.statusCode;
         message = err.message;
         errorType = "Payout Error"

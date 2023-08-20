@@ -5,6 +5,10 @@ import { successResponse } from '../utils/response.js';
 import Product from "../models/product.js";
 import ProductError from "../errors/product-error.js";
 import { uploadMoreImages } from "../utils/cloudinary.js";
+import Stripe from 'stripe';
+import CustomError from "../errors/custom-error.js";
+const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
+
 
 export default class SellerService {
 
@@ -106,8 +110,83 @@ export default class SellerService {
         return successResponse("Product deleted successfully", product._id);
     }
     
+    static async getSellerStripeStatus(user_id) {
+
+        // Find the seller using the provided user_id
+        let seller = await Seller.findOne({ userId: user_id });
+        if (!seller) {
+        throw new CustomError('Seller not found', 404);
+        }
+
+        // Retrieve the Stripe account using the seller's stripe_account_id
+        const account = await stripe.accounts.retrieve(seller.stripe_account_id);
+        if (!account) {
+        throw new CustomError('Stripe account not found', 404);
+        }
+        console.log(account)
+
+        // Check the Stripe account's verification status
+        const requirements = account.requirements;
+        const verificationStatus = requirements.currently_due.length === 0 && requirements.disabled_reason === null;
+        const enabled_status = account.charges_enabled && account.payouts_enabled
+
+        // if (!verificationStatus) {
+
+        
+        
+        seller.hasCompletedOnboarding = verificationStatus && enabled_status;
+        seller.is_verifed = verificationStatus && enabled_status;
+        seller.save();
+
+
+        return successResponse('The Stripe account is restricted', account );
+        // if (verificationStatus.status === 'verified') {
+        // return successResponse('The Stripe account is verified', { status: 'verified' });
+        // } else if (verificationStatus.status === 'unverified') {
+        // return successResponse('The Stripe account is not verified', { status: 'unverified' });
+        // } else if (verificationStatus.status === 'pending') {
+        // return successResponse('The Stripe account is pending verification', { status: 'pending' });
+        // } else {
+        // let disabled_reason = verificationStatus.disabled_reason || 'Unknown reason';
+        // return successResponse('The Stripe account is restricted', { status: 'restricted', disabled_reason });
+        // }
+
+
+    }
+
+    static async requestNewOnboardingLink(user_id) {
+    
+        // Find the seller using the provided user_id
+        const seller = await Seller.findOne({ userId: user_id });
+        
+        if (!seller) {
+          throw new CustomError('Seller account not found', 400);
+        }
+    
+        // Retrieve the Stripe account associated with this seller
+        const account = await stripe.accounts.retrieve(seller.stripe_account_id);
+        
+        if (!account) {
+          throw new CustomError('Stripe account not found', 400);
+        }
+        
+        // Create a new Stripe account link for this seller
+        const accountLink = await stripe.accountLinks.create({
+          account: account.id,
+          refresh_url: `${process.env.BASE_URL}/onboarding/refresh/${account.id}`,
+          return_url: `https://example.com/success`,
+          type: 'account_onboarding',
+          collect: 'eventually_due'
+        });
+    
+        return successResponse('New account link created successfully', accountLink);
+      }
+
 
     
+
+
+
     
         
 

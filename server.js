@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import errorHandler from "./middleware/error-handler.js";
 import CustomError from "./errors/custom-error.js";
 
-import Stripe from 'stripe';
+
 import loggerHandler from "./middleware/logger-handler.js";
 import Cart from "./models/cart.js";
 import { auth } from "./middleware/auth.js";
@@ -17,7 +17,7 @@ import Product from "./models/product.js";
 import Order from "./models/order.js";
 import OrderItem from "./models/orderItem.js";
 import toStripeAmount from "./utils/stripe.js";
-
+import Stripe from 'stripe';
 const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
 
 

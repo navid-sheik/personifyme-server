@@ -10,8 +10,11 @@ import orderRouter from './order.js'
 import cartRouter from './cart.js'
 import buyerRouter from './buyer.js'
 import searchRouter from './searches.js'
+import paymentRouter from './payment.js'
 import shopRouter from './shop.js'
+import userRouter from './user.js'
 import webHookRouter from './stripe-webhook.js'
+
 import { auth } from '../middleware/auth.js';
 
 const router  = express.Router();
@@ -30,6 +33,8 @@ router.use('/orders',orderRouter )
 router.use('/shop',shopRouter )
 router.use('/user',auth, buyerRouter )
 router.use('/search', searchRouter)
+router.use('/payments', paymentRouter)
+router.use('/users', userRouter)
 
 
 export default router;

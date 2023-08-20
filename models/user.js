@@ -15,6 +15,9 @@ const UserSchema = new mongoose.Schema({
         minlength: [3, 'Enter a valid name with at least 3 characters'],
        
     },
+    image : {
+        type : String,
+    },
     email: {
         type: String,
         required: [true, 'Please provide your email address'],
@@ -73,7 +76,11 @@ const UserSchema = new mongoose.Schema({
         type : [mongoose.Schema.Types.ObjectId],
         ref : 'Shop',
         default : [],
-    }
+    },
+    country : {
+        type : String,
+        default : 'United Kingdom',
+    },
     
     
 }, { timestamps: true , versionKey: false});

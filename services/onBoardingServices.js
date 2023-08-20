@@ -7,6 +7,7 @@ import Stripe from 'stripe';
 import { v4 as uuidv4 } from "uuid";
 import logger from "../logger/index.js";
 import Shop from "../models/shop.js";
+import Category from "../models/category.js";
 const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
 
 
@@ -20,7 +21,7 @@ export const createConnectedAccount   =  async (country, user_id) => {
     if(!user) {
         throw new AuthError("User not found", 401);
     }
-
+    console.log(user);
     //Create new account for stripe 
     const account  = await stripe.account.create({
         type : "custom",
@@ -59,7 +60,7 @@ export const createConnectedAccount   =  async (country, user_id) => {
     }
 
     const shop = new Shop({
-        ...shopData,
+        name : "placeholder",
         categoryId : category[0]._id,
         categoryName : category[0].name,
         emailSupport : user.email,
@@ -67,7 +68,7 @@ export const createConnectedAccount   =  async (country, user_id) => {
 
     await shop.save();
 
-    seller.shopId = newShop._id;
+    seller.shopId = shop._id;
     await seller.save();
 
     
@@ -197,12 +198,12 @@ export const checkVerificationStripe = async (user_id) => {
     }
 
     if (isVerified) {
-        seller.is_verified = true;
+        seller.is_verifed = true;
         seller.hasCompletedOnboarding = true;
         await seller.save();
         return successResponse("Account verified successfully", response);
     }else {
-        seller.is_verified = false;
+        seller.is_verifed = false;
         seller.hasCompletedOnboarding = false;
         await seller.save();
         return successResponse( "Account not verified successfully", response);

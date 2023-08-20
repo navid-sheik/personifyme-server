@@ -1,6 +1,9 @@
 import Seller from "../models/seller-account.js"
 import SellerService from "../services/sellerServices.js";
 import { errorResponse } from "../utils/response.js";
+import Stripe from 'stripe';
+const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
+
 
 
 
@@ -65,3 +68,27 @@ export const updateSellerProduct = async (req, res, next) => {
     }
 };
 
+
+
+
+// Function to get Stripe account verification status
+export const getSellerStripeStatus = async (req, res, next) => {
+    try {
+        const user_id = req.user
+        const response = await SellerService.getSellerStripeStatus(user_id);
+        return res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Function to request a new Stripe onboarding link
+export const requestNewOnboardingLink = async (req, res, next) => {
+    try {
+        const user_id = req.user 
+        const response = await SellerService.requestNewOnboardingLink(user_id);
+        return res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
