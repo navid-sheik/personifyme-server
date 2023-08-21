@@ -18,6 +18,7 @@ import Order from "./models/order.js";
 import OrderItem from "./models/orderItem.js";
 import toStripeAmount from "./utils/stripe.js";
 import Stripe from 'stripe';
+import User from "./models/user.js";
 const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
 
 
@@ -163,19 +164,28 @@ app.post("/create-payment-intent",auth, async (req, res) => {
     seller.items.forEach((item, itemIndex) => {
         console.log('  Item:', item);
     });
-});
+  });
 
  
+    let user =  await User.findById(user_id)
+   let stripeCustomerId  =  user.stripe_customer_id
+   if (!stripeCustomerId){
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name : user.name,
+        // other customer details
+      });
 
+      stripeCustomerId = customer.id
+      user.stripe_customer_id = stripeCustomerId
+      await user.save()
+   }
 
+   const ephemeralKey = await stripe.ephemeralKeys.create(
+    {customer: stripeCustomerId},
+    {apiVersion: '2022-11-15'}
+  );
 
-
-  
-
-
-
-
- 
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
@@ -187,6 +197,7 @@ app.post("/create-payment-intent",auth, async (req, res) => {
   
     amount: stripeTotal,
     currency: "gbp",
+    customer: stripeCustomerId, 
     automatic_payment_methods: {
       enabled: true,
     },
@@ -201,6 +212,8 @@ app.post("/create-payment-intent",auth, async (req, res) => {
   res.json({
     paymentIntent: paymentIntent.client_secret,
     payment_intent_id : paymentIntent.id,
+    ephemeralKey: ephemeralKey.secret,
+    customer: stripeCustomerId,
     publishableKey: 'pk_test_51NYyrYB6nvvF5Xeh38vBBJ9xWCtNKsSLuFexpx3A9nTpOAj9TZTLTRdRuo5cJbJusInPeXJo0LH1zoW3NHSDLtGZ00LrL4fvI5'
   });
 });

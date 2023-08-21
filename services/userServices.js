@@ -19,6 +19,10 @@ import Shop from "../models/shop.js";
 import mongoose from "mongoose";
 import logger from "../logger/index.js";
 import { uploadImage } from "../utils/cloudinary.js";
+import Stripe from 'stripe';
+const stripe = new Stripe( 'sk_test_51NYyrYB6nvvF5XehM7BqvJEdp9EWjsW0AnC24pdrSOWgUAeM3MEFB7sonWa0CHfVp3d7FkXwaZhHvfj1QzyEqdYJ00nmz013nW');
+
+
 
 
 
@@ -39,7 +43,14 @@ export const signup = async (name , email, password, username) => {
 
     //Create  a new empty cart
     //Create new stripe customer object 
-  
+    const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.name
+    });
+    user.stripe_customer_id = customer.id;  // Assuming you have a stripeCustomerId field in your User schema
+    await user.save();
+
+
     //Generate token 
     const { token, refreshToken } = await generateToken(user);
     return  successResponse("Successfully signed up", { seller_id: user.seller_id,  user_id: user._id,  email : user.email, username : user.username , name :user.name, verified : user.verified,   token : token,  refreshToken: refreshToken });
@@ -401,6 +412,42 @@ export const getLikedProducts = async (user_id) => {
     return successResponse("Successfully fetched liked products", user.likes);
 }
 
+
+
+
+export const getSavedPaymentMethods = async (user_id) => {
+    // Retrieve the user from your database
+    const user = await User.findById(user_id);
+    if (!user) {
+        throw new AuthError('User not found', 404);
+    }
+
+    // Make sure the user has a Stripe customer ID
+    if (!user.stripe_customer_id) {
+        throw new AuthError('Stripe customer not found for this user', 404);
+    }
+
+    // Fetch saved payment methods from Stripe
+    try {
+        const paymentMethods = await stripe.paymentMethods.list({
+            customer: user.stripe_customer_id,
+            type: 'card',  // Replace with the type of payment method you want to fetch
+        });
+
+        return successResponse("Successfully retrieved payment methods", paymentMethods.data);
+
+    } catch (error) {
+        // Handle Stripe errors or any other errors
+        throw new AuthError('Failed to retrieve payment methods', 400);
+    }
+}
+
+
+
+
+
+
+
 function isURL(str) {
     try {
         new URL(str);
@@ -417,3 +464,6 @@ function isBase64(str) {
       return false;
     }
   }
+
+
+  

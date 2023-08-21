@@ -224,9 +224,12 @@ export default class OrderService {
 
 
 
+        
+        const items = await OrderItem.find({
+            '_id': { $in: orderItemIds }
+          }).populate('product');
 
-
-        return successResponse("Orders fetched successfully for seller", newOrder);
+        return successResponse("Orders fetched successfully for seller", {order: newOrder, orderItems : items});
 
 
 

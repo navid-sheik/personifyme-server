@@ -172,6 +172,19 @@ const ProductSchema = new mongoose.Schema({
     
     },
 
+    isApproved : {
+
+        type: Boolean,
+        default: false
+
+    },
+
+    moderationMessage : {
+      type: String,
+
+    }
+  
+
 
 
 

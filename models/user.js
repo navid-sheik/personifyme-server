@@ -81,6 +81,11 @@ const UserSchema = new mongoose.Schema({
         type : String,
         default : 'United Kingdom',
     },
+
+    stripe_customer_id : {
+        type : String,
+    },
+    
     
     
 }, { timestamps: true , versionKey: false});

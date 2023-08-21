@@ -20,3 +20,18 @@ export const updateUserById = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const getSavedPaymentMethodsByUserId = async (req, res, next) => {
+    try {
+        const user_id = req.user;  // Assuming you store user ID in req.user
+        
+        // Retrieve saved payment methods
+        const response = await userServices.getSavedPaymentMethods(user_id);
+        
+        return res.status(200).json(response);
+
+    } catch (error) {
+        next(error);
+    }
+};

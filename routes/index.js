@@ -13,6 +13,7 @@ import searchRouter from './searches.js'
 import paymentRouter from './payment.js'
 import shopRouter from './shop.js'
 import userRouter from './user.js'
+import moderatorRouter from './moderator.js'
 import webHookRouter from './stripe-webhook.js'
 
 import { auth } from '../middleware/auth.js';
@@ -35,6 +36,7 @@ router.use('/user',auth, buyerRouter )
 router.use('/search', searchRouter)
 router.use('/payments', paymentRouter)
 router.use('/users', userRouter)
+router.use('/moderators', moderatorRouter)
 
 
 export default router;

@@ -62,3 +62,26 @@ export const getReviewsByProduct = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const getReviewForUser = async (req, res, next) => {
+    try {
+        //Alternative user params
+        const userId = req.user
+        const response = await ReviewService.getAllReviewFromUser(userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const getReviewForShop = async (req, res, next) => {
+    try {
+        const seller_id  =  req.params.id;
+        const response = await ReviewService.getReviewForShop(seller_id);
+        return res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
