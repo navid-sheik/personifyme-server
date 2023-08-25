@@ -30,7 +30,7 @@ export default class ProductService {
 
         let productDataWithSeller = { ...productData, seller_id: seller._id };
         logger.info(seller._id);
-        const product = await new Product(productDataWithSeller);
+        const product =  new Product(productDataWithSeller);
         await product.save();
         
 
@@ -69,7 +69,7 @@ export default class ProductService {
     }
 
     static async getProducts() {
-        const products = await Product.find({ isDeleted: false })
+        const products = await Product.find({ isDeleted: false , isApproved : true})
         .populate({
             path: 'seller_id',
             model: 'Seller',

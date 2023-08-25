@@ -14,12 +14,12 @@ export default class SellerService {
 
     static async getSellerProducts (user_id) {
 
-        let seller  = await Seller.findOne({ userId : user_id });
+        let seller  = await Seller.findOne({ userId : user_id  });
         if (!seller) {
             throw new AuthError('Seller not found', 404);
         }
 
-        const products = await Product.find({ seller_id : seller._id }).populate('seller_id category_id') ;
+        const products = await Product.find({ seller_id : seller._id , isDeleted : false  }).populate('seller_id category_id') ;
         return successResponse("Products fetched successfully", products);
 
 

@@ -196,7 +196,7 @@ app.post("/create-payment-intent",auth, async (req, res) => {
 
   
     amount: stripeTotal,
-    currency: "gbp",
+    currency: "usd",
     customer: stripeCustomerId, 
     automatic_payment_methods: {
       enabled: true,
